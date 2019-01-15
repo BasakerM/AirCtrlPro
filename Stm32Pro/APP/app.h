@@ -3,7 +3,7 @@
 
 #include "system.h"
 
-void app_init(void);
-void app_loop(void);
+void App_Init(void);
+void App_Loop(void);
 
 #endif

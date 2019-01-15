@@ -1,12 +1,11 @@
 #include "app.h"
 
-
-void app_init(void)
+void App_Init(void)
 {
-	system_init();
+	system.Init();
 }
 
-void app_loop(void)
+void App_Loop(void)
 {
-	system.led();
+	system.StatusLight();
 }

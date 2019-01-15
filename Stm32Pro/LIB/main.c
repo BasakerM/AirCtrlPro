@@ -2,9 +2,9 @@
 
 int main()
 {
-	app_init();
+	App_Init();
 	while(1)
 	{
-		app_loop();
+		App_Loop();
 	}
 }

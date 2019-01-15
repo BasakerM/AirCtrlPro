@@ -2,9 +2,10 @@
 .\objects\main.o: ..\APP\app.h
 .\objects\main.o: ..\LIB\system.h
 .\objects\main.o: ..\LIB\hardware.h
+.\objects\main.o: ..\LIB\systick.h
 .\objects\main.o: ..\CMSIS\stm32f10x.h
 .\objects\main.o: ..\CMSIS\core_cm3.h
-.\objects\main.o: C:\Users\M\Appliction\Keil\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main.o: C:\Users\M\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\main.o: ..\CMSIS\system_stm32f10x.h
 .\objects\main.o: ..\CMSIS\stm32f10x_conf.h
 .\objects\main.o: ..\FWLIB\inc\stm32f10x_adc.h
@@ -31,3 +32,4 @@
 .\objects\main.o: ..\FWLIB\inc\stm32f10x_usart.h
 .\objects\main.o: ..\FWLIB\inc\stm32f10x_wwdg.h
 .\objects\main.o: ..\FWLIB\inc\misc.h
+.\objects\main.o: ..\LIB\usart.h

@@ -390,16 +390,6 @@
           <GroupName>LIB</GroupName>
           <Files>
             <File>
-              <FileName>systick.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\systick.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\usart.c</FilePath>
-            </File>
-            <File>
               <FileName>system.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LIB\system.c</FilePath>
@@ -408,6 +398,16 @@
               <FileName>hardware.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LIB\hardware.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LIB\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>systick.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LIB\systick.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>

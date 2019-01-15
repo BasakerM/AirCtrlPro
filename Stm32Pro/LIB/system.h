@@ -3,11 +3,21 @@
 
 #include "hardware.h"
 
-void system_init(void);
+void System_Init(void);
+void System_StatusLight(void);
 
-typedef struct struct_system
+typedef enum
 {
-	void (*led)(void);
-}system;
+	SystemStatus_normal
+}SystemStatus;
+
+typedef struct Struct_System
+{
+	SystemStatus RunStatus;
+	
+	void (*Init)(void);
+	void (*StatusLight)(void);
+}System;
+static System system = {SystemStatus_normal,System_Init,System_StatusLight};
 
 #endif

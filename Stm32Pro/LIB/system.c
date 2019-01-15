@@ -1,6 +1,14 @@
 #include "system.h"
 
-void system_init(void)
+void System_Init(void)
 {
-	hardware_init();
+	hardware.Init();
+}
+
+void System_StatusLight(void)
+{
+	switch(system.RunStatus)
+	{
+		case SystemStatus_normal: hardware.LedFlash(0.5); break;
+	}
 }
