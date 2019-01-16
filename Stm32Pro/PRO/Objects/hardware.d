@@ -3,7 +3,7 @@
 .\objects\hardware.o: ..\LIB\systick.h
 .\objects\hardware.o: ..\CMSIS\stm32f10x.h
 .\objects\hardware.o: ..\CMSIS\core_cm3.h
-.\objects\hardware.o: C:\Users\M\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\hardware.o: C:\Users\M\Appliction\Keil\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\hardware.o: ..\CMSIS\system_stm32f10x.h
 .\objects\hardware.o: ..\CMSIS\stm32f10x_conf.h
 .\objects\hardware.o: ..\FWLIB\inc\stm32f10x_adc.h

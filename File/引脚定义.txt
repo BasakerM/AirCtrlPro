@@ -1,0 +1,18 @@
+
+
+relay0 : PB12
+relay1 : PB13
+relay2 : PB14
+relay3 : PB15
+
+485t:
+TX : PA9
+RX : PA10
+
+IR:
+TX : PA2
+RX : PA3
+
+ZM101S:
+TX : PB10
+RX : PB11
