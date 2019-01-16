@@ -132,11 +132,11 @@ void Tim_Init(void)
 	TIM_Cmd(TIM3, ENABLE);	
 }
 
-void TIM3_IRQHandler(void)
-{
-	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
-	{
-		hardware.Value.Tim3_count++;
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );
-	}
+//void TIM3_IRQHandler(void)
+//{
+//	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
+//	{
+//		hardware.Value.Tim3_count++;
+//		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );
+//	}
 }

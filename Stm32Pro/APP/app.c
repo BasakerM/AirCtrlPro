@@ -1,13 +1,15 @@
 #include "app.h"
 
+Led* led = NULL;
 void App_Init(void)
 {
-	system.Init();
+	System.New_Tim(TIM3);
+	led = System.New_Led(RCC_APB2Periph_GPIOC,GPIOC,GPIO_Pin_13);
 }
 
 void App_Loop(void)
 {
-	system.Function.StatusLight();
+	led->Flash(led,Tim3);
 	//获取485数据
 	//发送485数据
 	//获取IR数据
