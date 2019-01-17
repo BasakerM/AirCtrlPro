@@ -395,16 +395,6 @@
               <FilePath>..\LIB\system.c</FilePath>
             </File>
             <File>
-              <FileName>hardware.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\hardware.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\usart.c</FilePath>
-            </File>
-            <File>
               <FileName>systick.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LIB\systick.c</FilePath>
@@ -415,9 +405,9 @@
               <FilePath>..\LIB\main.c</FilePath>
             </File>
             <File>
-              <FileName>memorymanage.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\LIB\memorymanage.h</FilePath>
+              <FileName>memorymanage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LIB\memorymanage.c</FilePath>
             </File>
           </Files>
         </Group>

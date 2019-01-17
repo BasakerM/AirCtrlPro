@@ -139,4 +139,4 @@ void Tim_Init(void)
 //		hardware.Value.Tim3_count++;
 //		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );
 //	}
-}
+//}

@@ -25,6 +25,8 @@ Relay* System_New_Relay(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin
 	GPIO_InitStruct.GPIO_Pin = relay->Pin;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(relay->GPIOx,&GPIO_InitStruct);
+	
+	return relay;
 }
 
 void System_Relay_Open(Relay* relay)
@@ -37,9 +39,9 @@ void System_Relay_Close(Relay* relay)
 	GPIO_WriteBit(relay->GPIOx,relay->Pin,Bit_RESET);
 }
 
-bool System_Relay_IsOpen(struct Struct_System_Relay* relay)
+bool System_Relay_IsOpen(Relay* relay)
 {
-	if(GPIO_ReadOutputDataBit(relay->GPIOx,relay->Pin))
+	if(GPIO_ReadOutputDataBit(relay->GPIOx,relay->Pin) == Bit_SET)
 		return true;
 	else
 		return false;
@@ -54,7 +56,7 @@ void System_Led_Open(Led* Led);
 void System_Led_Close(Led* Led);
 bool System_Led_IsOn(struct Struct_System_Led* Led);
 void System_Led_Switch(Led* led);
-void System_Led_Flash(Led* led,Tim tim);
+void System_Led_Flash(Led* led);
 
 Led* System_New_Led(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin)
 {
@@ -75,6 +77,8 @@ Led* System_New_Led(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin)
 	GPIO_InitStruct.GPIO_Pin = led->Pin;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(led->GPIOx,&GPIO_InitStruct);
+	
+	return led;
 }
 
 void System_Led_Open(Led* led)
@@ -100,27 +104,101 @@ void System_Led_Switch(Led* led)
 	GPIO_WriteBit(led->GPIOx,led->Pin,(BitAction)(1-GPIO_ReadOutputDataBit(led->GPIOx,led->Pin)));
 }
 
-void System_Led_Flash(Led* led,Tim tim)
+void System_Led_Flash(Led* led)
 {
-	if(tim.IsTimeOut(led->FlashTime))
+	if(Tim3.IsTimeOut(led->FlashTime,&Tim3))
 	{
 		led->Switch(led);
 	}
 }
+//////////////////////////////////Usart///////////////////////////////////////
+//////////////////////////////////Usart///////////////////////////////////////
+//////////////////////////////////Usart///////////////////////////////////////
+//////////////////////////////////Usart///////////////////////////////////////
+//////////////////////////////////Usart///////////////////////////////////////
+void System_Usart_SendStr(Usart* usart,char* dat);
+void System_Usart_SendByte(Usart* usart,byte* dat,byte len);
+bool System_Usart_RecvByte(Usart* usart,byte* dat);
 
+Usart* System_New_Usart(USART_TypeDef* USARTx)
+{
+	Usart* usart = (Usart*)new(sizeof(Usart));
+	if(USARTx == USART1)
+	{
+		usart->USARTx = USART1;
+		usart->SendStr = System_Usart_SendStr;
+		usart->SendByte = System_Usart_SendByte;
+		usart->RecvByte = System_Usart_RecvByte;
+		
+		GPIO_InitTypeDef GPIO_InitStructure;
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA,ENABLE);
+		USART_DeInit(USART1);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOA,&GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+		GPIO_Init(GPIOA,&GPIO_InitStructure);
+		
+		USART_InitTypeDef USART_InitStruct;
+		USART_InitStruct.USART_BaudRate = 9600;
+		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+		USART_InitStruct.USART_Mode = USART_Mode_Tx|USART_Mode_Rx;
+		USART_InitStruct.USART_Parity = USART_Parity_No;
+		USART_InitStruct.USART_StopBits = USART_StopBits_1;
+		USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+		USART_Init(USART1,&USART_InitStruct);
+		
+		USART_Cmd(USART1,ENABLE);
+		
+		USART_ClearFlag(USART1,USART_FLAG_TC);
+	}
+	return usart;
+}
+
+void System_Usart_SendStr(Usart* usart,char* dat)
+{
+	while(*dat != '\0')
+	{
+		USART_SendData(usart->USARTx,*dat++);
+		while(!USART_GetFlagStatus(usart->USARTx,USART_FLAG_TC));
+	}
+}
+
+void System_Usart_SendByte(Usart* usart,byte* dat,byte len)
+{
+	while(len--)
+	{
+		USART_SendData(usart->USARTx,*dat++);
+		while(!USART_GetFlagStatus(usart->USARTx,USART_FLAG_TC));
+	}
+}
+
+bool System_Usart_RecvByte(Usart* usart,byte* dat)
+{
+	if(USART_GetFlagStatus(usart->USARTx,USART_FLAG_RXNE))
+	{
+		*dat = USART_ReceiveData(usart->USARTx);
+		return true;
+	}
+	return false;
+}
 //////////////////////////////////Tim///////////////////////////////////////
 //////////////////////////////////Tim///////////////////////////////////////
 //////////////////////////////////Tim///////////////////////////////////////
 //////////////////////////////////Tim///////////////////////////////////////
 //////////////////////////////////Tim///////////////////////////////////////
-bool System_Tim3_IsTimeOut(float sec);
+bool System_Tim_IsTimeOut(float sec,Tim* tim);
 
 void System_New_Tim(TIM_TypeDef* TIMx)
 {
 	if(TIMx == TIM3)
 	{
 		Tim3.TimeCount = 0;
-		Tim3.IsTimeOut = System_Tim3_IsTimeOut;
+		Tim3.IsTimeOut = System_Tim_IsTimeOut;
 		
 		TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 		NVIC_InitTypeDef NVIC_InitStructure;
@@ -136,7 +214,7 @@ void System_New_Tim(TIM_TypeDef* TIMx)
 		TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE );
 
 		NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
 		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&NVIC_InitStructure);
@@ -145,12 +223,12 @@ void System_New_Tim(TIM_TypeDef* TIMx)
 	}
 }
 
-bool System_Tim3_IsTimeOut(float sec)
+bool System_Tim_IsTimeOut(float sec,Tim* tim)
 {
 	unsigned int ms100 = sec*10;
-	if(Tim3.TimeCount >= ms100)
+	if(tim->TimeCount >= ms100)
 	{
-		Tim3.TimeCount = 0;
+		tim->TimeCount = 0;
 		return true;
 	}
 	return false;
@@ -164,6 +242,8 @@ void TIM3_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );
 	}
 }
+
+
 //////////////Old Code////////////////////////////////////////////////////////
 //////////////Old Code////////////////////////////////////////////////////////
 //////////////Old Code////////////////////////////////////////////////////////
