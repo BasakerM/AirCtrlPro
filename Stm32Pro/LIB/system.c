@@ -156,11 +156,80 @@ Usart* System_New_Usart(USART_TypeDef* USARTx)
 		
 		USART_ClearFlag(USART1,USART_FLAG_TC);
 	}
+	else if(USARTx == USART2)
+	{
+		usart->USARTx = USART2;
+		usart->SendStr = System_Usart_SendStr;
+		usart->SendByte = System_Usart_SendByte;
+		usart->RecvByte = System_Usart_RecvByte;
+		
+		GPIO_InitTypeDef GPIO_InitStructure;
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
+		USART_DeInit(USART2);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOA,&GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+		GPIO_Init(GPIOA,&GPIO_InitStructure);
+		
+		USART_InitTypeDef USART_InitStruct;
+		USART_InitStruct.USART_BaudRate = 9600;
+		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+		USART_InitStruct.USART_Mode = USART_Mode_Tx|USART_Mode_Rx;
+		USART_InitStruct.USART_Parity = USART_Parity_No;
+		USART_InitStruct.USART_StopBits = USART_StopBits_1;
+		USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+		USART_Init(USART2,&USART_InitStruct);
+		
+		USART_Cmd(USART2,ENABLE);
+		
+		USART_ClearFlag(USART2,USART_FLAG_TC);
+	}
+	else if(USARTx == USART3)
+	{
+		usart->USARTx = USART3;
+		usart->SendStr = System_Usart_SendStr;
+		usart->SendByte = System_Usart_SendByte;
+		usart->RecvByte = System_Usart_RecvByte;
+		
+		GPIO_InitTypeDef GPIO_InitStructure;
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
+		USART_DeInit(USART3);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOB,&GPIO_InitStructure);
+		
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+		GPIO_Init(GPIOB,&GPIO_InitStructure);
+		
+		USART_InitTypeDef USART_InitStruct;
+		USART_InitStruct.USART_BaudRate = 9600;
+		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+		USART_InitStruct.USART_Mode = USART_Mode_Tx|USART_Mode_Rx;
+		USART_InitStruct.USART_Parity = USART_Parity_No;
+		USART_InitStruct.USART_StopBits = USART_StopBits_1;
+		USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+		USART_Init(USART3,&USART_InitStruct);
+		
+		USART_Cmd(USART3,ENABLE);
+		
+		USART_ClearFlag(USART3,USART_FLAG_TC);
+	}
 	return usart;
 }
 
 void System_Usart_SendStr(Usart* usart,char* dat)
 {
+	USART_GetFlagStatus(usart->USARTx,USART_FLAG_TC);
 	while(*dat != '\0')
 	{
 		USART_SendData(usart->USARTx,*dat++);
@@ -170,6 +239,7 @@ void System_Usart_SendStr(Usart* usart,char* dat)
 
 void System_Usart_SendByte(Usart* usart,byte* dat,byte len)
 {
+	USART_GetFlagStatus(usart->USARTx,USART_FLAG_TC);
 	while(len--)
 	{
 		USART_SendData(usart->USARTx,*dat++);
