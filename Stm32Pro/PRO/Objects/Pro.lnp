@@ -4,6 +4,8 @@
 ".\objects\systick.o"
 ".\objects\main.o"
 ".\objects\memorymanage.o"
+".\objects\at24cx.o"
+".\objects\iic.o"
 ".\objects\core_cm3.o"
 ".\objects\startup_stm32f10x_md.o"
 ".\objects\stm32f10x_it.o"

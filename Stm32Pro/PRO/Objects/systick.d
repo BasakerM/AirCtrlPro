@@ -2,7 +2,7 @@
 .\objects\systick.o: ..\LIB\systick.h
 .\objects\systick.o: ..\CMSIS\stm32f10x.h
 .\objects\systick.o: ..\CMSIS\core_cm3.h
-.\objects\systick.o: C:\Users\M\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\systick.o: C:\Users\M\Appliction\Keil\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\systick.o: ..\CMSIS\system_stm32f10x.h
 .\objects\systick.o: ..\CMSIS\stm32f10x_conf.h
 .\objects\systick.o: ..\FWLIB\inc\stm32f10x_adc.h

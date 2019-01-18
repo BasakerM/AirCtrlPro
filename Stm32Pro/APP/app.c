@@ -1,12 +1,20 @@
 #include "app.h"
+#include "at24cx.h"
 
 void praser_485(unsigned char* buff);
 void usart_get(void);
 unsigned char usart1_get(unsigned char*buff,unsigned char dat);
 unsigned short crc(unsigned char* buff,unsigned char len);
 
-unsigned char master_addr0 = 0x00;
-unsigned char master_addr1 = 0x00;
+unsigned char master_addr0 = 0x01;
+unsigned char master_addr1 = 0x01;
+
+unsigned char master_id_h = 0x09;
+unsigned char master_id_l = 0x09;
+
+#define EEPROM_ADDR_FIRST_POWER 0x00
+#define EEPROM_ADDR_MASTER_ID_H 0x01
+#define EEPROM_ADDR_MASTER_ID_L 0x02
 
 Usart* usart1 = NULL;
 Usart* usart2 = NULL;
@@ -37,6 +45,7 @@ void App_Init(void)
 	usart1->SendStr(usart1,"hello world--USART1\r\n");
 	usart2->SendStr(usart2,"hello world--USART2\r\n");
 	usart3->SendStr(usart3,"hello world--USART3\r\n");
+	
 }
 
 void App_Loop(void)
@@ -51,7 +60,13 @@ void praser_485(unsigned char* buff)
 	{
 		if((buff[5] == 0xE0) && (buff[6] == 0x1C))
 		{/////////////////通用开关号///////////////
-			
+			if(buff[10] == 0xFF)
+			{
+				unsigned char SendBuff[5] = {0xA1,0xFD,0x02,0x00,0xDF};
+				SendBuff[3] = buff[9];
+				usart1->SendByte(usart1,SendBuff,5);
+				return;
+			}
 		}
 		else if((buff[5] == 0x00) && (buff[6] == 0x31))
 		{/////////////////继电器指令///////////////
@@ -78,7 +93,7 @@ void praser_485(unsigned char* buff)
 								SendBuff[16] = crcc>>8;
 								SendBuff[17] = crcc&0x00ff;
 								usart1->SendByte(usart1,SendBuff,18);
-					break;
+								return;
 				case 2:  break;
 				case 3:  break;
 				case 4:  break;
@@ -86,6 +101,11 @@ void praser_485(unsigned char* buff)
 		}
 	}
 }
+
+//void praser_ir(unsigned char* buff)
+//{
+//
+//}
 
 unsigned char usart1_recv_buff[32] = {0};
 unsigned char usart2_recv_buff[32] = {0};
@@ -144,6 +164,11 @@ unsigned char usart1_get(unsigned char*buff,unsigned char dat)
 	}
 	return false;
 }
+
+//bool usart2_get(unsigned char* buff,unsigned char dat)
+//{
+//
+//}
 
 
 

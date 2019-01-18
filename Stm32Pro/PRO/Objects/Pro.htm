@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\Pro.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\Pro.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu Jan 17 23:58:02 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri Jan 18 22:36:09 2019
 <BR><P>
 <H3>Maximum Stack Usage =        100 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -425,7 +425,7 @@ Global Symbols
 
 <P><STRONG><a name="[af]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[79]"></a>App_Init</STRONG> (Thumb, 138 bytes, Stack size 8 bytes, app.o(i.App_Init))
+<P><STRONG><a name="[79]"></a>App_Init</STRONG> (Thumb, 228 bytes, Stack size 8 bytes, app.o(i.App_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = App_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[54]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -564,8 +564,8 @@ Global Symbols
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB2PeriphClockCmd
 <LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
 </UL>
-<BR>[Address Reference Count : 2]<UL><LI> system.o(.data)
-<LI> app.o(.data)
+<BR>[Address Reference Count : 2]<UL><LI> app.o(.data)
+<LI> system.o(.data)
 </UL>
 <P><STRONG><a name="[46]"></a>System_New_Relay</STRONG> (Thumb, 72 bytes, Stack size 24 bytes, system.o(i.System_New_Relay))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = System_New_Relay &rArr; GPIO_Init
@@ -574,8 +574,8 @@ Global Symbols
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB2PeriphClockCmd
 <LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
 </UL>
-<BR>[Address Reference Count : 2]<UL><LI> system.o(.data)
-<LI> app.o(.data)
+<BR>[Address Reference Count : 2]<UL><LI> app.o(.data)
+<LI> system.o(.data)
 </UL>
 <P><STRONG><a name="[48]"></a>System_New_Tim</STRONG> (Thumb, 114 bytes, Stack size 24 bytes, system.o(i.System_New_Tim))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = System_New_Tim &rArr; NVIC_Init
@@ -586,8 +586,8 @@ Global Symbols
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB1PeriphClockCmd
 <LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NVIC_Init
 </UL>
-<BR>[Address Reference Count : 2]<UL><LI> system.o(.data)
-<LI> app.o(.data)
+<BR>[Address Reference Count : 2]<UL><LI> app.o(.data)
+<LI> system.o(.data)
 </UL>
 <P><STRONG><a name="[49]"></a>System_New_Usart</STRONG> (Thumb, 452 bytes, Stack size 32 bytes, system.o(i.System_New_Usart))
 <BR><BR>[Stack]<UL><LI>Max Depth = 100<LI>Call Chain = System_New_Usart &rArr; USART_Init &rArr; RCC_GetClocksFreq
@@ -601,8 +601,8 @@ Global Symbols
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB1PeriphClockCmd
 <LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
 </UL>
-<BR>[Address Reference Count : 2]<UL><LI> system.o(.data)
-<LI> app.o(.data)
+<BR>[Address Reference Count : 2]<UL><LI> app.o(.data)
+<LI> system.o(.data)
 </UL>
 <P><STRONG><a name="[40]"></a>System_Relay_Close</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, system.o(i.System_Relay_Close))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = System_Relay_Close
@@ -698,8 +698,8 @@ Global Symbols
 <P><STRONG><a name="[6b]"></a>USART_DeInit</STRONG> (Thumb, 134 bytes, Stack size 8 bytes, stm32f10x_usart.o(i.USART_DeInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = USART_DeInit
 </UL>
-<BR>[Calls]<UL><LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB2PeriphResetCmd
-<LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB1PeriphResetCmd
+<BR>[Calls]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB1PeriphResetCmd
+<LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_APB2PeriphResetCmd
 </UL>
 <BR>[Called By]<UL><LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;System_New_Usart
 </UL>
@@ -752,7 +752,7 @@ Global Symbols
 <LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;System_New_Led
 </UL>
 
-<P><STRONG><a name="[7a]"></a>praser_485</STRONG> (Thumb, 222 bytes, Stack size 32 bytes, app.o(i.praser_485))
+<P><STRONG><a name="[7a]"></a>praser_485</STRONG> (Thumb, 264 bytes, Stack size 32 bytes, app.o(i.praser_485))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = praser_485 &rArr; crc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;crc

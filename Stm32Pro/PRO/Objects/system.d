@@ -2,7 +2,7 @@
 .\objects\system.o: ..\LIB\system.h
 .\objects\system.o: ..\CMSIS\stm32f10x.h
 .\objects\system.o: ..\CMSIS\core_cm3.h
-.\objects\system.o: C:\Users\M\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\system.o: C:\Users\M\Appliction\Keil\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\system.o: ..\CMSIS\system_stm32f10x.h
 .\objects\system.o: ..\CMSIS\stm32f10x_conf.h
 .\objects\system.o: ..\FWLIB\inc\stm32f10x_adc.h
