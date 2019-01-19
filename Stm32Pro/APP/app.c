@@ -2,8 +2,12 @@
 #include "at24cx.h"
 
 void praser_485(unsigned char* buff);
+void praser_IM1253B(unsigned char* buff);
 void usart_get(void);
 unsigned char usart1_get(unsigned char*buff,unsigned char dat);
+unsigned char usart3_get(unsigned char* buff,unsigned char dat);
+void clear_buff(unsigned char* buff,unsigned short size);
+unsigned short crc_16 ( unsigned char* buff, unsigned char len);
 unsigned short crc(unsigned char* buff,unsigned char len);
 
 unsigned char master_addr0 = 0x01;
@@ -54,22 +58,26 @@ void App_Loop(void)
 	usart_get();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
 void praser_485(unsigned char* buff)
 {
 	if((buff[7] == master_addr0) && (buff[8] == master_addr1))
 	{
 		if((buff[5] == 0xE0) && (buff[6] == 0x1C))
-		{/////////////////通用开关号///////////////
+		{/////////////////通用开关///////////////
 			if(buff[10] == 0xFF)
 			{
 				unsigned char SendBuff[5] = {0xA1,0xFD,0x02,0x00,0xDF};
 				SendBuff[3] = buff[9];
-				usart1->SendByte(usart1,SendBuff,5);
+				usart1->SendByte(usart2,SendBuff,5);
 				return;
 			}
 		}
 		else if((buff[5] == 0x00) && (buff[6] == 0x31))
-		{/////////////////继电器指令///////////////
+		{/////////////////单路调节///////////////
 			unsigned short crcc = 0;
 			unsigned char SendBuff[18] = {0xaa,0xaa,0x10,0x00,0x00,0x01,0xBC,0x00,0x32,0xFF,0xFF,0x00,0xF8,0x00,0x04,0x00,0x00,0x00};
 			SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
@@ -99,14 +107,41 @@ void praser_485(unsigned char* buff)
 				case 4:  break;
 			}
 		}
+		else if((buff[5] == 0x19) && (buff[6] == 0x19))
+		{/////////////////单路读取///////////////
+			unsigned char SendToUsart3[8] = {0x01,0x03,0x00,0x4B,0x00,0x00,0x00,0x00};
+			switch(buff[9])
+			{
+				case 1: SendToUsart3[5] = 0x01; SendToUsart3[6] = 0xF4; SendToUsart3[7] = 0x1C;
+								usart3->SendByte(usart3,SendToUsart3,8);
+				return;
+				case 2:  return;
+				case 3:  return;
+				case 4:  return;
+			}
+		}
 	}
+	clear_buff(buff,32);
 }
 
-//void praser_ir(unsigned char* buff)
-//{
-//
-//}
+void praser_IM1253B(unsigned char* buff)
+{
+	unsigned char SendBuff[18] = {0xaa,0xaa,0x10,0x00,0x00,0x19,0x19,0x19,0x19,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
+	SendBuff[11] = buff[0];
+	SendBuff[12] = buff[3]; SendBuff[13] = buff[4]; SendBuff[14] = buff[5]; SendBuff[15] = buff[6];
+	unsigned short crcc = 0;
+	crcc = crc(SendBuff,18);
+	SendBuff[16] = crcc>>8; SendBuff[17] = crcc&0x00ff;
+	usart1->SendByte(usart1,SendBuff,18);
+	clear_buff(buff,32);
+}
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
 unsigned char usart1_recv_buff[32] = {0};
 unsigned char usart2_recv_buff[32] = {0};
 unsigned char usart3_recv_buff[32] = {0};
@@ -118,15 +153,15 @@ void usart_get(void)
 		if(usart1_get(usart1_recv_buff,recv_dat))
 			praser_485(usart1_recv_buff);
 	}
-	if(usart2->RecvByte(usart2,&recv_dat))
+	/*if(usart2->RecvByte(usart2,&recv_dat))
 	{
 		if(usart1_get(usart1_recv_buff,recv_dat))
 			praser_485(usart1_recv_buff);
-	}
+	}*/
 	if(usart3->RecvByte(usart3,&recv_dat))
 	{
-		if(usart1_get(usart1_recv_buff,recv_dat))
-			praser_485(usart1_recv_buff);
+		if(usart3_get(usart3_recv_buff,recv_dat))
+			praser_IM1253B(usart3_recv_buff);
 	}
 }
 
@@ -170,7 +205,72 @@ unsigned char usart1_get(unsigned char*buff,unsigned char dat)
 //
 //}
 
+unsigned char usart3_get(unsigned char* buff,unsigned char dat)
+{
+	static unsigned char usart3_recv_index = 0;
+	static unsigned char usart3_recv_len = 0;
+	static unsigned char usart3_recv_flag = 0;
+	if(usart3_recv_flag == 0)
+	{
+		if(dat == 0x01) { usart3_recv_flag++; buff[0] = dat; }
+	}
+	else if(usart3_recv_flag == 1)
+	{
+		if(dat == 0x03 || dat == 0x06) { usart3_recv_flag++; buff[1] = dat; }
+	}
+	else if(usart3_recv_flag == 2)
+	{
+		usart3_recv_len = 0; usart3_recv_index = 0;
+		usart3_recv_len = dat; usart3_recv_flag++; buff[2] = dat;
+	}
+	else if(usart3_recv_flag == 3)
+	{
+		if(usart3_recv_index < usart3_recv_len+1)
+		{
+			buff[3+usart3_recv_index++] = dat;
+		}
+		else
+		{
+			usart3_recv_flag = 0;
+			buff[3+usart3_recv_index] = dat;
+			unsigned short cc = crc_16(buff,usart3_recv_len+3);
+			if(((cc>>8) == buff[3+usart3_recv_index-1]) && ((cc&0x00ff) == buff[3+usart3_recv_index]))
+			{
+				//usart1->SendByte(usart1,buff,3+usart3_recv_len+2);
+				return 3+usart3_recv_len+2;
+			}
+		}
+	}
+	return 0;
+}
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+void clear_buff(unsigned char* buff,unsigned short size)
+{
+	while(size--)
+		*buff++ = 0;
+}
+
+unsigned short crc_16 ( unsigned char* buff, unsigned char len)
+{
+	unsigned short crc=0xFFFF;
+	unsigned char i, j;
+	for (j = 0;j < len;j++)
+	{
+		crc = crc^(*buff++);
+		for (i = 0;i < 8;i++)
+		{
+			if((crc&0x0001) > 0) { crc = crc>>1; crc = crc^ 0xa001; }
+			else crc = crc>>1;
+		}
+	}
+	crc = (crc>>8 | crc << 8) & 0xffff;
+	return crc;
+}
 
 unsigned short crc(unsigned char* buff,unsigned char len)
 {
