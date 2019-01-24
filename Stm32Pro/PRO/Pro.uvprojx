@@ -395,19 +395,9 @@
               <FilePath>..\LIB\system.c</FilePath>
             </File>
             <File>
-              <FileName>systick.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\systick.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LIB\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>memorymanage.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\memorymanage.c</FilePath>
             </File>
             <File>
               <FileName>at24cx.c</FileName>

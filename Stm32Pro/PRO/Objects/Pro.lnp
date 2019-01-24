@@ -1,9 +1,7 @@
 --cpu Cortex-M3
 ".\objects\app.o"
 ".\objects\system.o"
-".\objects\systick.o"
 ".\objects\main.o"
-".\objects\memorymanage.o"
 ".\objects\at24cx.o"
 ".\objects\iic.o"
 ".\objects\core_cm3.o"

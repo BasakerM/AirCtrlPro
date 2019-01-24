@@ -2,7 +2,7 @@
 .\objects\at24cx.o: ..\LIB\at24cx.h
 .\objects\at24cx.o: ..\CMSIS\stm32f10x.h
 .\objects\at24cx.o: ..\CMSIS\core_cm3.h
-.\objects\at24cx.o: C:\Users\M\Appliction\Keil\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\at24cx.o: C:\Users\WSM\Application\Keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\objects\at24cx.o: ..\CMSIS\system_stm32f10x.h
 .\objects\at24cx.o: ..\CMSIS\stm32f10x_conf.h
 .\objects\at24cx.o: ..\FWLIB\inc\stm32f10x_adc.h

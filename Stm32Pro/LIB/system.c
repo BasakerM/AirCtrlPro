@@ -263,12 +263,80 @@ bool System_Usart_RecvByte(Usart* usart,byte* dat)
 //////////////////////////////////AT24C02///////////////////////////////////////
 
 
-//////////////////////////////////IIC///////////////////////////////////////
-//////////////////////////////////IIC///////////////////////////////////////
-//////////////////////////////////IIC///////////////////////////////////////
-//////////////////////////////////IIC///////////////////////////////////////
-//////////////////////////////////IIC///////////////////////////////////////
+//////////////////////////////////Systick///////////////////////////////////////
+//////////////////////////////////Systick///////////////////////////////////////
+//////////////////////////////////Systick///////////////////////////////////////
+//////////////////////////////////Systick///////////////////////////////////////
+//////////////////////////////////Systick///////////////////////////////////////
+void System_SystickDelay(unsigned int time);
 
+void System_SystickInit(unsigned long time)
+{
+	if(time > 0 && time <= 1000000)
+	{
+		systick.Time = 1;
+		systick.Delay = System_SystickDelay;
+		
+		SysTick_Config(SystemCoreClock/(1000000/time));
+		SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
+	}
+}
+
+void System_SystickDelay(unsigned int time)
+{
+	systick.Time = time;
+	SysTick->CTRL |=SysTick_CTRL_ENABLE_Msk;
+	while(systick.Time);
+	SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
+}
+
+//unsigned long time_out = 0;
+//void timeout_start(float sec)
+//{
+//	if(sec > 0)
+//	{
+//		time_out = sec*10;
+//		SysTick->CTRL |=SysTick_CTRL_ENABLE_Msk;
+//	}
+//}
+
+//void timeout_end(void)
+//{
+//	time_out = 0;
+//	SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
+//}
+
+//unsigned char timeout_status_get(void)
+//{
+//	if(time_out)
+//	{
+//		return 0;
+//	}
+//	else
+//	{
+//		SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
+//		return 1;
+//	}
+//}
+
+//void systick_ms(unsigned long time)
+//{
+//	Timing=time*1000;
+//	SysTick->CTRL |=SysTick_CTRL_ENABLE_Msk;
+//	while(Timing!=0);
+//}
+
+//void systick_us(unsigned long time)
+//{
+//	Timing=time;
+//	SysTick->CTRL |=SysTick_CTRL_ENABLE_Msk;
+//	while(Timing!=0);
+//}
+
+void SysTick_Handler(void)
+{
+	if(systick.Time) systick.Time--;
+}
 
 //////////////////////////////////Tim///////////////////////////////////////
 //////////////////////////////////Tim///////////////////////////////////////
@@ -327,4 +395,76 @@ void TIM3_IRQHandler(void)
 	}
 }
 
+//////////////////////////////////System Function///////////////////////////////////////
+//////////////////////////////////System Function///////////////////////////////////////
+//////////////////////////////////System Function///////////////////////////////////////
+//////////////////////////////////System Function///////////////////////////////////////
+//////////////////////////////////System Function///////////////////////////////////////
 
+void System_Delay(unsigned int time)
+{
+	systick.Time = time;
+	SysTick->CTRL |=SysTick_CTRL_ENABLE_Msk;
+	while(systick.Time);
+	SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
+}
+
+void System_ClearBuff(unsigned char* buff,unsigned short size)
+{
+	while(size--)
+		*buff++ = 0;
+}
+
+unsigned short System_CRC_16(unsigned char* buff,unsigned char len)
+{
+	unsigned short crc=0xFFFF;
+	unsigned char i, j;
+	for (j = 0;j < len;j++)
+	{
+		crc = crc^(*buff++);
+		for (i = 0;i < 8;i++)
+		{
+			if((crc&0x0001) > 0) { crc = crc>>1; crc = crc^ 0xa001; }
+			else crc = crc>>1;
+		}
+	}
+	crc = (crc>>8 | crc << 8) & 0xffff;
+	return crc;
+}
+
+unsigned short System_CRC_xModem(unsigned char* buff,unsigned char len)
+{
+	unsigned short crcin = 0x0000;
+	unsigned short crc = 0x1021;
+	while(len--)
+	{
+		crcin = ((crcin&0xff00)^((*buff++)<<8))|(crcin&0x00ff);
+		unsigned char bi = 8;
+		while(bi--)
+		{
+			if((crcin & 0x8000) > 0){crcin <<= 1; crcin ^= crc;}
+			else crcin <<= 1;
+		}
+	}
+	return crcin;
+}
+
+//////////////////////////////////System Base///////////////////////////////////////
+
+static unsigned char Memory[MEMORY_SIZE_MAX] = {0};
+static unsigned int MemoryFreeSize = MEMORY_SIZE_MAX;
+static unsigned char* MemoryFreeAddr = Memory;
+
+void* new(unsigned char size)
+{
+	if(size > MemoryFreeSize) return NULL;
+	
+	void* addr = (void*)MemoryFreeAddr;
+	MemoryFreeSize -= size;
+	MemoryFreeAddr += size;
+	
+	return addr;
+}
+
+
+//////////////////////////////////System Base///////////////////////////////////////

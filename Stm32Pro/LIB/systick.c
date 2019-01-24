@@ -1,9 +1,10 @@
 #include "systick.h"
 
-void systick_init(void)
+void systick_init(unsigned int time)
 {
-	SysTick_Config(SystemCoreClock/10);//100ms中断一次
-	SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;//关闭滴答
+	
+	SysTick_Config(SystemCoreClock/(1000000/time));
+	SysTick->CTRL &=~SysTick_CTRL_ENABLE_Msk;
 }
 
 //

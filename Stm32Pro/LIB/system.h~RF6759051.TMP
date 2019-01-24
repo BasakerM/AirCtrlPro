@@ -2,6 +2,7 @@
 #define _system_h
 
 #include "stm32f10x.h"
+#include "memorymanage.h"
 
 //////////////////////////////////////////////////////////////////////////////
 typedef enum { false, true}bool;
@@ -20,23 +21,6 @@ typedef struct Struct_System_Relay
 	void (*Close)(struct Struct_System_Relay* relay);
 	bool (*IsOpen)(struct Struct_System_Relay* relay);
 }Relay;
-//////////////////////////////////Led///////////////////////////////////////
-//////////////////////////////////Led///////////////////////////////////////
-//////////////////////////////////Led///////////////////////////////////////
-typedef struct Struct_System_Led
-{
-	uint32_t RCC_APB2Periph;
-	GPIO_TypeDef* GPIOx;
-	uint16_t Pin;
-	
-	float FlashTime;
-	
-	void (*On)(struct Struct_System_Led* led);
-	void (*Off)(struct Struct_System_Led* led);
-	bool (*IsOn)(struct Struct_System_Led* led);
-	void (*Switch)(struct Struct_System_Led* led);
-	void (*Flash)(struct Struct_System_Led* led);
-}Led;
 //////////////////////////////////Usart///////////////////////////////////////
 //////////////////////////////////Usart///////////////////////////////////////
 //////////////////////////////////Usart///////////////////////////////////////
@@ -59,16 +43,23 @@ typedef struct Struct_System_Tim
 	bool (*IsTimeOut)(float sec,struct Struct_System_Tim* tim);
 }Tim;
 static Tim Tim3;
-//////////////////////////////////Systick///////////////////////////////////////
-//////////////////////////////////Systick///////////////////////////////////////
-//////////////////////////////////Systick///////////////////////////////////////
-typedef struct Struct_System_Systick
+//////////////////////////////////Led///////////////////////////////////////
+//////////////////////////////////Led///////////////////////////////////////
+//////////////////////////////////Led///////////////////////////////////////
+typedef struct Struct_System_Led
 {
-	unsigned int Time;
+	uint32_t RCC_APB2Periph;
+	GPIO_TypeDef* GPIOx;
+	uint16_t Pin;
 	
-	void (*Delay)(unsigned int time);
-}Systick;
-static Systick systick;
+	float FlashTime;
+	
+	void (*On)(struct Struct_System_Led* led);
+	void (*Off)(struct Struct_System_Led* led);
+	bool (*IsOn)(struct Struct_System_Led* led);
+	void (*Switch)(struct Struct_System_Led* led);
+	void (*Flash)(struct Struct_System_Led* led);
+}Led;
 //////////////////////////////////System///////////////////////////////////////
 //////////////////////////////////System///////////////////////////////////////
 //////////////////////////////////System///////////////////////////////////////
@@ -76,38 +67,17 @@ Relay* System_New_Relay(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin
 Led* System_New_Led(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
 void System_New_Tim(TIM_TypeDef* TIMx);
 Usart* System_New_Usart(USART_TypeDef* USARTx);
-void System_SystickInit(unsigned long time);
 
-void System_Delay(unsigned int time);
-void System_ClearBuff(unsigned char* buff,unsigned short size);
-unsigned short System_CRC_16(unsigned char* buff,unsigned char len);
-unsigned short System_CRC_xModem(unsigned char* buff,unsigned char len);
-	
 struct Struct_System
 {
 	Relay* (*New_Relay)(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
 	Led* (*New_Led)(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
 	void (*New_Tim)(TIM_TypeDef* TIMx);
 	Usart* (*New_Usart)(USART_TypeDef* USARTx);
-	void (*New_Systick)(unsigned long time);
-	
-	void (*Delay)(unsigned int time);
-	void (*ClearBuff)(unsigned char* buff,unsigned short size);
-	unsigned short (*System_CRC_16)(unsigned char* buff,unsigned char len);
-	unsigned short (*System_CRC_xModem)(unsigned char* buff,unsigned char len);
 };
 static struct Struct_System System = 
 {
-	System_New_Relay,System_New_Led,System_New_Tim,System_New_Usart,System_SystickInit,
-	System_Delay,System_ClearBuff,System_CRC_16,System_CRC_xModem
+	System_New_Relay,System_New_Led,System_New_Tim,System_New_Usart
 };
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-#define MEMORY_SIZE_MAX 8000
-#define NULL 0
-void* new(unsigned char size);
-//////////////////////////////////////////////////////////////////////////////
 #endif

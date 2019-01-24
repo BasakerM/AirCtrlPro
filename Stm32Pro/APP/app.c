@@ -1,5 +1,4 @@
 #include "app.h"
-#include "at24cx.h"
 
 void praser_485(unsigned char* buff);
 void praser_IM1253B(unsigned char* buff);
@@ -32,6 +31,7 @@ Relay* relay4 = NULL;
 void App_Init(void)
 {
 	System.New_Tim(TIM3);
+	System.New_Systick(100000);
 	usart1 = System.New_Usart(USART1);
 	usart2 = System.New_Usart(USART2);
 	usart3 = System.New_Usart(USART3);
@@ -97,7 +97,7 @@ void praser_485(unsigned char* buff)
 									SendBuff[13] = 0x00;//开关量
 									SendBuff[15] = 0x00;//回路状态
 								}
-								crcc = crc(SendBuff,14);
+								crcc = System.System_CRC_xModem(SendBuff,14);
 								SendBuff[16] = crcc>>8;
 								SendBuff[17] = crcc&0x00ff;
 								usart1->SendByte(usart1,SendBuff,18);
@@ -121,7 +121,7 @@ void praser_485(unsigned char* buff)
 			}
 		}
 	}
-	clear_buff(buff,32);
+	System.ClearBuff(buff,32);
 }
 
 void praser_IM1253B(unsigned char* buff)
@@ -131,10 +131,10 @@ void praser_IM1253B(unsigned char* buff)
 	SendBuff[11] = buff[0];
 	SendBuff[12] = buff[3]; SendBuff[13] = buff[4]; SendBuff[14] = buff[5]; SendBuff[15] = buff[6];
 	unsigned short crcc = 0;
-	crcc = crc(SendBuff,18);
+	crcc = System_CRC_xModem(SendBuff,18);
 	SendBuff[16] = crcc>>8; SendBuff[17] = crcc&0x00ff;
 	usart1->SendByte(usart1,SendBuff,18);
-	clear_buff(buff,32);
+	System.ClearBuff(buff,32);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ unsigned char usart1_get(unsigned char*buff,unsigned char dat)
 		{
 			usart1_recv_flag = 0;
 			buff[usart1_recv_index] = dat;
-			unsigned short cc = crc(usart1_recv_buff,usart1_recv_len-2);
+			unsigned short cc = System_CRC_xModem(usart1_recv_buff,usart1_recv_len-2);
 			if((usart1_recv_buff[usart1_recv_len-2] == (cc>>8)) && (usart1_recv_buff[usart1_recv_len-1] == (cc&0x00ff)))
 			{
 				return usart1_recv_len;
@@ -233,7 +233,7 @@ unsigned char usart3_get(unsigned char* buff,unsigned char dat)
 		{
 			usart3_recv_flag = 0;
 			buff[3+usart3_recv_index] = dat;
-			unsigned short cc = crc_16(buff,usart3_recv_len+3);
+			unsigned short cc = System.System_CRC_16(buff,usart3_recv_len+3);
 			if(((cc>>8) == buff[3+usart3_recv_index-1]) && ((cc&0x00ff) == buff[3+usart3_recv_index]))
 			{
 				//usart1->SendByte(usart1,buff,3+usart3_recv_len+2);
@@ -244,47 +244,3 @@ unsigned char usart3_get(unsigned char* buff,unsigned char dat)
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-void clear_buff(unsigned char* buff,unsigned short size)
-{
-	while(size--)
-		*buff++ = 0;
-}
-
-unsigned short crc_16 ( unsigned char* buff, unsigned char len)
-{
-	unsigned short crc=0xFFFF;
-	unsigned char i, j;
-	for (j = 0;j < len;j++)
-	{
-		crc = crc^(*buff++);
-		for (i = 0;i < 8;i++)
-		{
-			if((crc&0x0001) > 0) { crc = crc>>1; crc = crc^ 0xa001; }
-			else crc = crc>>1;
-		}
-	}
-	crc = (crc>>8 | crc << 8) & 0xffff;
-	return crc;
-}
-
-unsigned short crc(unsigned char* buff,unsigned char len)
-{
-	unsigned short crcin = 0x0000;
-	unsigned short crc = 0x1021;
-	while(len--)
-	{
-		crcin = ((crcin&0xff00)^((*buff++)<<8))|(crcin&0x00ff);
-		unsigned char bi = 8;
-		while(bi--)
-		{
-			if((crcin & 0x8000) > 0){crcin <<= 1; crcin ^= crc;}
-			else crcin <<= 1;
-		}
-	}
-	return crcin;
-}
