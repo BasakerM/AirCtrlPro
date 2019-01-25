@@ -37,6 +37,14 @@ typedef struct Struct_System_Led
 	void (*Switch)(struct Struct_System_Led* led);
 	void (*Flash)(struct Struct_System_Led* led);
 }Led;
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+typedef struct Struct_System_EEPRom
+{
+	unsigned char (*ReadByte)(unsigned char addr);
+	void (*WriteByte)(unsigned char addr,unsigned char dat);
+}EEPRom;
 //////////////////////////////////Usart///////////////////////////////////////
 //////////////////////////////////Usart///////////////////////////////////////
 //////////////////////////////////Usart///////////////////////////////////////
@@ -74,11 +82,13 @@ static Systick systick;
 //////////////////////////////////System///////////////////////////////////////
 Relay* System_New_Relay(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
 Led* System_New_Led(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
+EEPRom* System_AT24CxInit(void);
 void System_New_Tim(TIM_TypeDef* TIMx);
 Usart* System_New_Usart(USART_TypeDef* USARTx);
 void System_SystickInit(unsigned long time);
 
 void System_Delay(unsigned int time);
+unsigned char System_Sum(unsigned char* buff,unsigned char len);
 void System_ClearBuff(unsigned char* buff,unsigned short size);
 unsigned short System_CRC_16(unsigned char* buff,unsigned char len);
 unsigned short System_CRC_xModem(unsigned char* buff,unsigned char len);
@@ -87,19 +97,21 @@ struct Struct_System
 {
 	Relay* (*New_Relay)(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
 	Led* (*New_Led)(uint32_t RCC_APB2Periph,GPIO_TypeDef* GPIOx,uint16_t Pin);
+	EEPRom* (*New_EEPRom)(void);
 	void (*New_Tim)(TIM_TypeDef* TIMx);
 	Usart* (*New_Usart)(USART_TypeDef* USARTx);
 	void (*New_Systick)(unsigned long time);
 	
 	void (*Delay)(unsigned int time);
+	unsigned char (*Sum)(unsigned char* buff,unsigned char len);
 	void (*ClearBuff)(unsigned char* buff,unsigned short size);
-	unsigned short (*System_CRC_16)(unsigned char* buff,unsigned char len);
-	unsigned short (*System_CRC_xModem)(unsigned char* buff,unsigned char len);
+	unsigned short (*CRC_16)(unsigned char* buff,unsigned char len);
+	unsigned short (*CRC_xModem)(unsigned char* buff,unsigned char len);
 };
 static struct Struct_System System = 
 {
-	System_New_Relay,System_New_Led,System_New_Tim,System_New_Usart,System_SystickInit,
-	System_Delay,System_ClearBuff,System_CRC_16,System_CRC_xModem
+	System_New_Relay,System_New_Led,System_AT24CxInit,System_New_Tim,System_New_Usart,System_SystickInit,
+	System_Delay,System_Sum,System_ClearBuff,System_CRC_16,System_CRC_xModem
 };
 
 //////////////////////////////////////////////////////////////////////////////

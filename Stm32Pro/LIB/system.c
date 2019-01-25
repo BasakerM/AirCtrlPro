@@ -395,6 +395,238 @@ void TIM3_IRQHandler(void)
 	}
 }
 
+//////////////////////////////////IIC///////////////////////////////////////
+//////////////////////////////////IIC///////////////////////////////////////
+//////////////////////////////////IIC///////////////////////////////////////
+//////////////////////////////////IIC///////////////////////////////////////
+//////////////////////////////////IIC///////////////////////////////////////
+#define GPIO_RCC_IIC RCC_APB2Periph_GPIOA
+#define GPIOX_IIC GPIOA
+#define GPIO_PIN_IIC_SDA GPIO_Pin_0
+#define GPIO_PIN_IIC_SCL GPIO_Pin_1
+
+#define IIC_SDA_H GPIO_SetBits(GPIOX_IIC,GPIO_PIN_IIC_SDA)
+#define IIC_SDA_L GPIO_ResetBits(GPIOX_IIC,GPIO_PIN_IIC_SDA)
+#define IIC_SDA_R GPIO_ReadInputDataBit(GPIOX_IIC,GPIO_PIN_IIC_SDA)
+#define IIC_SCL_H GPIO_SetBits(GPIOX_IIC,GPIO_PIN_IIC_SCL)
+#define IIC_SCL_L GPIO_ResetBits(GPIOX_IIC,GPIO_PIN_IIC_SCL)
+
+void System_IICDelayUs(unsigned short us)
+{
+	unsigned short k = 0;
+	while(--us)
+	{
+		k = 500;
+		while(--k);
+	}
+}
+
+void System_IICInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct;
+	RCC_APB2PeriphClockCmd(GPIO_RCC_IIC,ENABLE);
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStruct.GPIO_Pin = GPIO_PIN_IIC_SCL|GPIO_PIN_IIC_SDA;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOX_IIC,&GPIO_InitStruct);
+}
+
+void System_IICSDAIn(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStruct.GPIO_Pin = GPIO_PIN_IIC_SDA;
+	GPIO_Init(GPIOX_IIC,&GPIO_InitStruct);
+}
+
+void System_IICSDAOut(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStruct.GPIO_Pin = GPIO_PIN_IIC_SDA;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOX_IIC,&GPIO_InitStruct);
+}
+
+void System_IICStart(void)
+{
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_H;
+	System_IICDelayUs(5);
+	IIC_SCL_H;
+	System_IICDelayUs(5);
+	IIC_SDA_L;
+	System_IICDelayUs(5);
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+}
+
+void System_IICStop(void)
+{
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_L;
+	System_IICDelayUs(5);
+	IIC_SCL_H;
+	System_IICDelayUs(5);
+	IIC_SDA_H;
+	System_IICDelayUs(5);
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+}
+
+unsigned char System_IICWaitAck(void)
+{
+	unsigned short time = 0;
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_H;
+	System_IICSDAIn();
+	System_IICDelayUs(5);
+	IIC_SCL_H;
+	System_IICDelayUs(5);
+	while(IIC_SDA_R)
+	{
+		time++;
+		if(time > 65000) return 0;
+	}
+	System_IICDelayUs(5);
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	return 1;
+}
+
+void System_IICAck(void)
+{
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_L;
+	System_IICDelayUs(5);
+	IIC_SCL_H;
+	System_IICDelayUs(5);
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+}
+
+void System_IICNoAck(void)
+{
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_H;
+	System_IICDelayUs(5);
+	IIC_SCL_H;
+	System_IICDelayUs(5);
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+}
+
+void System_IICWriteByte(unsigned char data)
+{
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	for(int i = 0;i < 8;i++)
+	{
+		if(data&0x80)
+			IIC_SDA_H;
+		else
+			IIC_SDA_L;
+		data <<= 1;
+		System_IICDelayUs(5);
+		IIC_SCL_H;
+		System_IICDelayUs(5);
+		IIC_SCL_L;
+		System_IICDelayUs(5);
+	}
+}
+
+unsigned char System_IICReadByte(void)
+{
+	unsigned char data = 0x00;
+	IIC_SCL_L;
+	System_IICDelayUs(5);
+	System_IICSDAOut();
+	IIC_SDA_H;
+	System_IICSDAIn();
+	System_IICDelayUs(5);
+	for(int i = 0;i < 8;i++)
+	{
+		IIC_SCL_H;
+		System_IICDelayUs(5);
+		data = (data<<1) | IIC_SDA_R;
+		System_IICDelayUs(5);
+		IIC_SCL_L;
+		System_IICDelayUs(5);
+	}
+	return data;
+}
+
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+//////////////////////////////////AT24Cx///////////////////////////////////////
+#define AT24CX_ADDR_W 0xA0
+#define AT24CX_ADDR_R 0xA1
+
+unsigned char System_AT24CxReadByte(unsigned char addr);
+void System_AT24CxWriteByte(unsigned char addr,unsigned char data);
+
+void System_AT24CxDelay()
+{
+	unsigned short time = 8000;
+	while(--time);
+}
+
+EEPRom* System_AT24CxInit(void)
+{
+	System_IICInit();
+	EEPRom* eeprom = (EEPRom*)new(sizeof(EEPRom));
+	eeprom->ReadByte = System_AT24CxReadByte;
+	eeprom->WriteByte = System_AT24CxWriteByte;
+	return eeprom;
+}
+
+void System_AT24CxWriteByte(unsigned char addr,unsigned char data)
+{
+	System_IICStart();
+	System_IICWriteByte(AT24CX_ADDR_W);
+	System_IICAck();
+	System_IICWriteByte(0x00);
+	System_IICAck();
+	System_IICWriteByte(addr);
+	System_IICAck();
+	System_IICWriteByte(data);
+	System_IICAck();
+	System_IICStop();
+	System_AT24CxDelay();
+}
+
+unsigned char System_AT24CxReadByte(unsigned char addr)
+{
+	unsigned char data = 0x00;
+	System_IICStart();
+	System_IICWriteByte(AT24CX_ADDR_W);
+	System_IICAck();
+	System_IICWriteByte(0x00);
+	System_IICAck();
+	System_IICWriteByte(addr);
+	System_IICAck();
+	System_IICStart();
+	System_IICWriteByte(AT24CX_ADDR_R);
+	System_IICAck();
+	data = System_IICReadByte();
+	System_IICNoAck();
+	System_IICStop();
+	System_AT24CxDelay();
+	return data;
+}
 //////////////////////////////////System Function///////////////////////////////////////
 //////////////////////////////////System Function///////////////////////////////////////
 //////////////////////////////////System Function///////////////////////////////////////
@@ -413,6 +645,14 @@ void System_ClearBuff(unsigned char* buff,unsigned short size)
 {
 	while(size--)
 		*buff++ = 0;
+}
+
+unsigned char System_Sum(unsigned char* buff,unsigned char len)
+{
+	unsigned char sum = 0;
+	while(len--)
+		sum += *buff++;
+	return sum;
 }
 
 unsigned short System_CRC_16(unsigned char* buff,unsigned char len)

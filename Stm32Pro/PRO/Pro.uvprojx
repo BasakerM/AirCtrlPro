@@ -399,16 +399,6 @@
               <FileType>1</FileType>
               <FilePath>..\LIB\main.c</FilePath>
             </File>
-            <File>
-              <FileName>at24cx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\at24cx.c</FilePath>
-            </File>
-            <File>
-              <FileName>iic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LIB\iic.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
