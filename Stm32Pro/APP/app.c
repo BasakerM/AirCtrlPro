@@ -46,9 +46,6 @@ void App_Init(void)
 	unsigned char eep = at24cx->ReadByte(0x00);
 	usart1->SendByte(usart1,&eep,1);
 	
-	usart1->SendStr(usart1,"Start\r\n");
-	usart2->SendStr(usart2,"Start\r\n");
-	usart3->SendStr(usart3,"Start\r\n");
 //	usart1->SendStr(usart1,"System Start\r\n");
 //	usart2->SendStr(usart2,"IR Start\r\n");
 //	usart3->SendStr(usart3,"IM1281B Start\r\n");
