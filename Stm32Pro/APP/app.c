@@ -10,8 +10,8 @@ unsigned char usart3_get(unsigned char* buff,unsigned char dat);
 unsigned char master_addr0 = 0x01;
 unsigned char master_addr1 = 0x01;
 
-unsigned char ir_addr0 = 0x01;
-unsigned char ir_addr1 = 0x01;
+unsigned char ir_addr0 = 0x5E;
+unsigned char ir_addr1 = 0x38;
 
 Usart* usart1 = NULL;
 Usart* usart2 = NULL;
