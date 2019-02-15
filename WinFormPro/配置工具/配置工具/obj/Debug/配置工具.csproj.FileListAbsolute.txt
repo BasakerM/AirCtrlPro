@@ -1,0 +1,12 @@
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\bin\Debug\配置工具.exe.config
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\bin\Debug\配置工具.exe
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\bin\Debug\配置工具.pdb
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.csprojAssemblyReference.cache
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.Form1.resources
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.Properties.Resources.resources
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.csproj.GenerateResource.cache
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.csproj.CoreCompileInputs.cache
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.exe
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.pdb
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.空调控制器.resources
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\配置工具\配置工具\obj\Debug\配置工具.空调控制器ID修改窗.resources

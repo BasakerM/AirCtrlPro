@@ -6,12 +6,13 @@ void usart_get(void);
 unsigned char usart1_get(unsigned char*buff,unsigned char dat);
 unsigned char usart2_get(unsigned char* buff,unsigned char dat);
 unsigned char usart3_get(unsigned char* buff,unsigned char dat);
+void FirstStartUp(void);
 
 unsigned char master_addr0 = 0x01;
 unsigned char master_addr1 = 0x01;
 
-unsigned char ir_addr0 = 0x5E;
-unsigned char ir_addr1 = 0x38;
+unsigned char ir_addr0 = 0x01;//0x5E;
+unsigned char ir_addr1 = 0x01;//0x38;
 
 Usart* usart1 = NULL;
 Usart* usart2 = NULL;
@@ -42,9 +43,16 @@ void App_Init(void)
 	relay3->Close(relay3);
 	relay4->Close(relay4);
 	
-	at24cx->WriteByte(0x00,0x19);
-	unsigned char eep = at24cx->ReadByte(0x00);
-	usart1->SendByte(usart1,&eep,1);
+	FirstStartUp();
+	
+	usart1->SendByte(usart1,&master_addr0,1);
+	usart1->SendByte(usart1,&master_addr1,1);
+	usart1->SendByte(usart1,&ir_addr0,1);
+	usart1->SendByte(usart1,&ir_addr1,1);
+	
+//	at24cx->WriteByte(0x00,0xFF);
+//	unsigned char eep = at24cx->ReadByte(0x00);
+//	usart1->SendByte(usart1,&eep,1);
 	
 //	usart1->SendStr(usart1,"System Start\r\n");
 //	usart2->SendStr(usart2,"IR Start\r\n");
@@ -117,7 +125,7 @@ void praser_485(unsigned char* buff)
 				case 4:  break;
 			}
 		}
-		else if((buff[7] == 0x19) && (buff[8] == 0x19))
+		else if((buff[7] == 0xFF) && (buff[8] == 0x19))
 		{/////////////////单路读取///////////////
 			unsigned char SendToUsart3[8] = {0x01,0x03,0x00,0x4B,0x00,0x00,0x00,0x00};
 			switch(buff[11])
@@ -130,6 +138,38 @@ void praser_485(unsigned char* buff)
 				case 4:  return;
 			}
 		}
+		else if((buff[7] == 0xff) && (buff[8] == 0x1B))
+		{/////////////////地址测试///////////////
+			unsigned short crcc = 0;
+			unsigned char SendBuff[13] = {0xaa,0xaa,0x0B,0x00,0x00,0x19,0x19,0xFF,0x1C,0xFF,0xFF,0x00,0x00};
+			SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
+			crcc = System.CRC_xModem(&SendBuff[2],9);
+			SendBuff[11] = crcc>>8;
+			SendBuff[12] = crcc&0x00ff;
+			usart1->SendByte(usart1,SendBuff,13);
+			return;
+		}
+		else if((buff[7] == 0xff) && (buff[8] == 0x1D))
+		{/////////////////地址设置///////////////
+			unsigned short crcc = 0;
+			unsigned char SendBuff[13] = {0xaa,0xaa,0x0B,0x00,0x00,0x19,0x19,0xFF,0x1E,0xFF,0xFF,0x00,0x00};
+			at24cx->WriteByte(0x01,buff[11]); at24cx->WriteByte(0x02,buff[12]);
+			master_addr0 = at24cx->ReadByte(0x01); master_addr1 = at24cx->ReadByte(0x02);
+			SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
+			crcc = System.CRC_xModem(&SendBuff[2],9);
+			SendBuff[11] = crcc>>8;
+			SendBuff[12] = crcc&0x00ff;
+			usart1->SendByte(usart1,SendBuff,13);
+			return;
+		}
+		else if((buff[7] == 0xff) && (buff[8] == 0x19))
+		{/////////////////红外学习///////////////
+			//////发至IR
+			unsigned char SendBuffToUsart2[11] = {0x7e,0x07,0x00,0xFF,0xFF,0x00,0x00,0x12,0x00,0x00,0x00};
+			SendBuffToUsart2[5] = ir_addr0; SendBuffToUsart2[6] = ir_addr1;
+			SendBuffToUsart2[8] = buff[11]; SendBuffToUsart2[10] = System.Sum(SendBuffToUsart2,10);
+			usart2->SendByte(usart2,SendBuffToUsart2,11);
+		}
 	}
 	System.ClearBuff(buff,32);
 }
@@ -139,6 +179,14 @@ void praser_IR(unsigned char* buff)
 	if(buff[7] == 0x13 && buff[10] == 0x01)
 	{//学习回复
 		//学习成功
+		unsigned short crcc = 0;
+		unsigned char SendBuff[13] = {0xaa,0xaa,0x0B,0x00,0x00,0x19,0x19,0xFF,0x20,0xFF,0xFF,0x00,0x00};
+		SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
+		crcc = System.CRC_xModem(&SendBuff[2],9);
+		SendBuff[11] = crcc>>8;
+		SendBuff[12] = crcc&0x00ff;
+		usart1->SendByte(usart1,SendBuff,13);
+		return;
 	}
 	else if(buff[7] == 0x15 && buff[10] == 0x01)
 	{//发射回复
@@ -149,7 +197,7 @@ void praser_IR(unsigned char* buff)
 
 void praser_IM1253B(unsigned char* buff)
 {
-	unsigned char SendBuff[18] = {0xaa,0xaa,0x10,0x00,0x00,0x19,0x19,0x19,0x19,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	unsigned char SendBuff[18] = {0xaa,0xaa,0x10,0x00,0x00,0x19,0x19,0xFF,0x1A,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 	SendBuff[3] = master_addr0; SendBuff[4] = master_addr1;
 	SendBuff[11] = buff[0];
 	SendBuff[12] = buff[3]; SendBuff[13] = buff[4]; SendBuff[14] = buff[5]; SendBuff[15] = buff[6];
@@ -319,5 +367,37 @@ unsigned char usart3_get(unsigned char* buff,unsigned char dat)
 		System.ClearBuff(buff,32);
 	}
 	return 0;
+}
+
+void FirstStartUp(void)
+{
+	if(at24cx->ReadByte(0x00) == 0xFF)
+	{/////////////////首次开机///////////////
+		unsigned char u2ch = 0x00;
+		unsigned char u2buff[32] = {0x00};
+		unsigned char u2buff1[9] = {0x7e,0x05,0x00,0xff,0xff,0xff,0xff,0x01,0x80};
+		usart2->SendByte(usart2,u2buff1,9);
+		led->FlashTime = 0.1;
+		while(1)
+		{
+		 led->Flash(led);
+		 if(usart2->RecvByte(usart2,&u2ch))
+			{
+				if(usart2_get(u2buff,u2ch) && u2buff[10] == 0x01)
+				{
+					ir_addr0 = u2buff[8]; ir_addr1 = u2buff[9];
+					at24cx->WriteByte(0x03,ir_addr0); at24cx->WriteByte(0x04,ir_addr1);
+					led->FlashTime = 0.7;
+					at24cx->WriteByte(0x00,0x00);
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		master_addr0 = at24cx->ReadByte(0x01); master_addr1 = at24cx->ReadByte(0x02);
+		ir_addr0 = at24cx->ReadByte(0x03); ir_addr1 = at24cx->ReadByte(0x04);
+	}
 }
 

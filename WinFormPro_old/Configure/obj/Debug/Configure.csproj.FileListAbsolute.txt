@@ -11,10 +11,10 @@ C:\Users\WSM\Desktop\空调控制上位机\Configure\Configure\obj\Debug\Configu
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\bin\Debug\Configure.exe
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\bin\Debug\Configure.pdb
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.csprojAssemblyReference.cache
-C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.Form1.resources
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.Form2.resources
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.Properties.Resources.resources
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.csproj.GenerateResource.cache
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.csproj.CoreCompileInputs.cache
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.exe
 C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.pdb
+C:\Users\WSM\Documents\GitHub\AirCtrlPro\WinFormPro\Configure\obj\Debug\Configure.SendBuff.resources

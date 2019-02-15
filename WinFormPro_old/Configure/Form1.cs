@@ -10,40 +10,10 @@ using System.Windows.Forms;
 
 namespace Configure
 {
-    public class SendBuff
-    {
-        public void SetBuff_Relay(byte addr0,byte addr1,int channel,bool isopen)
-        {
-            Buff_Relay[9] = addr0;
-            Buff_Relay[10] = addr1;
-            if(channel > 0 && channel < 5) Buff_Relay[11] = (byte)channel;
-            if(isopen)  Buff_Relay[12] = 0x64;
-            else Buff_Relay[12] = 0x00;
-        }
-        public byte[] GetBuff_Relay()
-        {
-            return Buff_Relay;
-        }
-        public void SetBuff_IR(byte addr0, byte addr1, int channel, bool isopen)
-        {
-            Buff_IR[9] = addr0;
-            Buff_IR[10] = addr1;
-            if (channel > 0 && channel < 255) Buff_IR[11] = (byte)channel;
-            if (isopen) Buff_IR[12] = 0xFF;
-            else Buff_IR[12] = 0x00;
-        }
-        public byte[] GetBuff_IR()
-        {
-            return Buff_IR;
-        }
-        private byte[] Buff_Relay = new byte[15] { 0xAA, 0xAA, 0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        private byte[] Buff_IR = new byte[15] { 0xAA, 0xAA, 0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    }
-
     public partial class Form1 : Form
     {
         //定义端口类
-        public SerialPort ComDevice = new SerialPort();
+        public static SerialPort ComDevice = new SerialPort();
         public Form1()
         {
             InitializeComponent();
@@ -472,27 +442,27 @@ namespace Configure
             return crc_val;
         }
 
-        public bool Data_Send(byte[] data)
-        {
-            if (ComDevice.IsOpen)
-            {
-                try
-                {
-                    //将消息传递给串口
-                    ComDevice.Write(data, 0, data.Length);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "发送失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("串口未开启", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            return false;
-        }
+        //public bool Data_Send(byte[] data)
+        //{
+        //    if (ComDevice.IsOpen)
+        //    {
+        //        try
+        //        {
+        //            //将消息传递给串口
+        //            ComDevice.Write(data, 0, data.Length);
+        //            return true;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show(ex.Message, "发送失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("串口未开启", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //    return false;
+        //}
 
         public static byte[] serialport_dat = new byte[256];
         public static ushort serialport_flag = 0;
@@ -538,6 +508,83 @@ namespace Configure
                 }
             }
         }
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            comboBox_PortName.Items.AddRange(SerialPort.GetPortNames());
+            if (comboBox_PortName.Items.Count > 1)
+            {
+                comboBox_PortName.SelectedIndex = 1;
+            }
+            else if (comboBox_PortName.Items.Count == 1)
+            {
+                comboBox_PortName.SelectedIndex = 0;
+            }
+            else
+            {
+                MessageBox.Show("未发现可用串口，请检查硬件设备");
+            }
+
+            comboBox_BaudRate.SelectedIndex = comboBox_BaudRate.Items.IndexOf("9600");
+            comboBox_DataBits.SelectedIndex = comboBox_DataBits.Items.IndexOf("8");
+            comboBox_StopBits.SelectedIndex = comboBox_StopBits.Items.IndexOf("1");
+            comboBox_Parity.SelectedIndex = comboBox_Parity.Items.IndexOf("偶校验");
+            comboBox_CRCType.SelectedIndex = comboBox_CRCType.Items.IndexOf("CRC-CCITT (XModem)");
+            pictureBox_Switch.BackColor = Color.Black;
+            pictureBox_Relay.BackColor = Color.Black;
+            pictureBox_Connect.BackColor = Color.Black;
+            ComDevice.DataReceived += new SerialDataReceivedEventHandler(Com_DataReceived);
+        }
+
+        private void Form1_Closing(object sender, FormClosingEventArgs e)
+        {
+            if (ComDevice.IsOpen == true)
+            {
+                try
+                {
+                    //关闭串口
+                    ComDevice.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "串口关闭错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public bool Open = true;
+        public bool Off = false;
+
+        public void OperateRelay(byte addr0, byte addr1, int channel, bool status)
+        {
+            byte[] Buff_Relay = new byte[15] { 0xAA, 0xAA, 0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Buff_Relay[9] = addr0;
+            Buff_Relay[10] = addr1;
+            if (channel > 0 && channel < 5) Buff_Relay[11] = (byte)channel;
+            if (status) Buff_Relay[12] = 0x64;
+            else Buff_Relay[12] = 0x00;
+            Form1.Data_Send(Buff_Relay);
+        }
+
+        public void TransmitIR(byte addr0, byte addr1, int channel)
+        {
+            byte[] Buff_IR = new byte[15] { 0xAA, 0xAA, 0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Buff_IR[9] = addr0;
+            Buff_IR[10] = addr1;
+            if (channel > 0 && channel < 255) Buff_IR[11] = (byte)channel;
+            Buff_IR[12] = 0xFF;
+        }
+
+        public void StudyIR(byte addr0, byte addr1, int channel)
+        {
+            byte[] Buff_IR = new byte[15] { 0xAA, 0xAA, 0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Buff_IR[9] = addr0;
+            Buff_IR[10] = addr1;
+            if (channel > 0 && channel < 255) Buff_IR[11] = (byte)channel;
+        }
         public ushort CRC_Xmodeom(byte[] buff, int len)
         {
             ushort crc_val = 0x0000;
@@ -582,52 +629,30 @@ namespace Configure
         {
             byte[] ReDatas = new byte[ComDevice.BytesToRead];
             ComDevice.Read(ReDatas, 0, ReDatas.Length);
-            //MessageBox.Show(ReDatas.Length.ToString());
-            Data_choice(ReDatas);
+            foreach( byte ch in ReDatas)
+                DataPrase(ch);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public static bool Data_Send(byte[] data)
         {
-            comboBox_PortName.Items.AddRange(SerialPort.GetPortNames());
-            if (comboBox_PortName.Items.Count > 1)
-            {
-                comboBox_PortName.SelectedIndex = 1;
-            }
-            else if (comboBox_PortName.Items.Count == 1)
-            {
-                comboBox_PortName.SelectedIndex = 0;
-            }
-            else
-            {
-                MessageBox.Show("未发现可用串口，请检查硬件设备");
-            }
-
-            comboBox_BaudRate.SelectedIndex = comboBox_BaudRate.Items.IndexOf("9600");
-            comboBox_DataBits.SelectedIndex = comboBox_DataBits.Items.IndexOf("8");
-            comboBox_StopBits.SelectedIndex = comboBox_StopBits.Items.IndexOf("1");
-            comboBox_Parity.SelectedIndex = comboBox_Parity.Items.IndexOf("偶校验");
-            comboBox_CRCType.SelectedIndex = comboBox_CRCType.Items.IndexOf("CRC-CCITT (XModem)");
-            pictureBox_Switch.BackColor = Color.Black;
-            pictureBox_Relay.BackColor = Color.Black;
-            pictureBox_Connect.BackColor = Color.Black;
-            ComDevice.DataReceived += new SerialDataReceivedEventHandler(Com_DataReceived);
-        }
-
-        private void Form1_Closing(object sender, FormClosingEventArgs e)
-        {
-            if (ComDevice.IsOpen == true)
+            if (ComDevice.IsOpen)
             {
                 try
                 {
-                    //关闭串口
-                    ComDevice.Close();
+                    //将消息传递给串口
+                    ComDevice.Write(data, 0, data.Length);
+                    return true;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "串口关闭错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    MessageBox.Show(ex.Message, "发送失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            else
+            {
+                MessageBox.Show("串口未开启", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return false;
         }
     }
 }

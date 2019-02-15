@@ -1,5 +1,5 @@
 Dependencies for Project 'Pro', Target 'Target 1': (DO NOT MODIFY !)
-F (..\APP\app.c)(0x5C4C0E24)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\PRO -I ..\LIB -I ..\FWLIB\inc -I ..\CMSIS -I ..\APP-I.\RTE\_Target_1-IC:\Users\WSM\Application\Keil5\ARM\PACK\Keil\STM32F1xx_DFP\1.0.5\Device\Include-IC:\Users\WSM\Application\Keil5\ARM\CMSIS\Include-D__UVISION_VERSION="523" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD-o .\objects\app.o --omf_browse .\objects\app.crf --depend .\objects\app.d)
+F (..\APP\app.c)(0x5C668A8B)(--c99 -c --cpu Cortex-M3 -g -O0 --apcs=interwork --split_sections -I ..\PRO -I ..\LIB -I ..\FWLIB\inc -I ..\CMSIS -I ..\APP-I.\RTE\_Target_1-IC:\Users\WSM\Application\Keil5\ARM\PACK\Keil\STM32F1xx_DFP\1.0.5\Device\Include-IC:\Users\WSM\Application\Keil5\ARM\CMSIS\Include-D__UVISION_VERSION="523" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD-o .\objects\app.o --omf_browse .\objects\app.crf --depend .\objects\app.d)
 I (..\APP\app.h)(0x5C45170A)
 I (..\LIB\system.h)(0x5C4AE742)
 I (..\CMSIS\stm32f10x.h)(0x5C45170A)
