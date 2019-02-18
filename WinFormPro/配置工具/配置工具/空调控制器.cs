@@ -34,6 +34,28 @@ namespace 配置工具
                 textBox_ID2.Text = data[4].ToString();
                 SetIDStatusDisconnect();
             }
+            else if (data[7] == 0x00 && data[8] == 0x32)
+            {
+                if (data[13] == 0x64)
+                    SetRelayStatusOpen();
+                else if(data[13] == 0x00)
+                    SetRelayStatusClose();
+            }
+            else if (data[7] == 0xe0 && data[8] == 0x1d)
+            {
+                if (data[12] == 0x01)
+                    SetIRStatusSendComplete();
+            }
+            else if (data[7] == 0xff && data[8] == 0x20)
+            {
+                SetIRStatusStudyComplete();
+            }
+            else if (data[7] == 0xff && data[8] == 0x1a)
+            {
+                ulong kwh = (ulong)((data[12] << 24) + (data[13] << 16) + (data[14] << 8) + data[15]);
+                double kwh1 = (double)(kwh*1.0 / 10000);
+                textBox_KWh.Text = kwh1.ToString();
+            }
         }
 
         public static SerialPort ComDevice = new SerialPort();
@@ -186,6 +208,70 @@ namespace 配置工具
             button_PortSwitch.Text = "打开";
         }
 
+        void SetRelayStatusOpen()
+        {
+            pictureBox_RelayStatus.BackColor = Color.Green;
+            button_RelaySwitch.Text = "关闭";
+        }
+        void SetRelayStatusClose()
+        {
+            pictureBox_RelayStatus.BackColor = Color.Black;
+            button_RelaySwitch.Text = "打开";
+        }
+        bool RelayStatusIsOpen()
+        {
+            if (button_RelaySwitch.Text == "关闭") return true;
+            return false;
+        }
+        void ResetKWh()
+        {
+            textBox_KWh.Text = "0.0001";
+        }
+
+        void ClearIRStatus()
+        {
+            pictureBox_IRSendStatus.BackColor = Color.Black;
+            pictureBox_IRStudyStatus.BackColor = Color.Black;
+            button_IRSend.Enabled = true;
+            button_IRStudy.Enabled = true;
+        }
+        void SetIRStatusSendComplete()
+        {
+            pictureBox_IRSendStatus.BackColor = Color.Green;
+            button_IRSend.Enabled = true;
+        }
+        void SetIRStatusSend()
+        {
+            pictureBox_IRSendStatus.BackColor = Color.Yellow;
+            button_IRSend.Enabled = false;
+        }
+        void SetIRStatusStudyComplete()
+        {
+            textBox_IRNumber.Enabled = true;
+            pictureBox_IRStudyStatus.BackColor = Color.Green;
+            button_IRStudy.Enabled = true;
+            pictureBox_IRSendStatus.BackColor = Color.Black;
+            button_IRSend.Enabled = true;
+        }
+        void SetIRStatusStudy()
+        {
+            textBox_IRNumber.Enabled = false;
+            pictureBox_IRStudyStatus.BackColor = Color.Yellow;
+            button_IRStudy.Enabled = false;
+            pictureBox_IRSendStatus.BackColor = Color.Black;
+            button_IRSend.Enabled = false;
+        }
+        byte GetIRNumber()
+        {
+            if((textBox_IRNumber.Text == "") || (int.Parse(textBox_IRNumber.Text) < 1 || int.Parse(textBox_IRNumber.Text) > 255))
+            {
+                MessageBox.Show("存储序号错误");
+                return 0x00;
+            }
+            else
+                return byte.Parse(textBox_IRNumber.Text);
+            
+        }
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -207,8 +293,11 @@ namespace 配置工具
 
             SetPortStatusClose();
             SetIDStatusDisconnect();
+            SetRelayStatusClose();
+            ClearIRStatus();
             textBox_ID1.Text = "1";
             textBox_ID2.Text = "1";
+            comboBox_RelayChannel.SelectedIndex = 1;
             ComDevice.DataReceived += new SerialDataReceivedEventHandler(Com_DataReceived);
         }
 
@@ -272,7 +361,10 @@ namespace 配置工具
                 SetPortStatusClose();
             }
 
-            SetIDStatusDisconnect();
+            SetIDStatusDisconnect(); 
+            SetRelayStatusClose();
+            ResetKWh();
+            ClearIRStatus();
             comboBox_PortName.Enabled = !ComDevice.IsOpen;
         }
 
@@ -286,24 +378,26 @@ namespace 配置工具
             if(IDStatusIsConnect())
             {
                 SetIDStatusDisconnect();
+                SetRelayStatusClose();
+                ClearIRStatus();
+                ResetKWh();
                 return;
             }
             string id1 = textBox_ID1.Text;
             string id2 = textBox_ID2.Text;
-            if ((int.Parse(id1) >= 1 && int.Parse(id1) <= 255) && (int.Parse(id2) >= 1 && int.Parse(id2) <= 255))
-            {
-                byte[] sbuff = new byte[13] { 0xaa, 0xaa, 0x0b, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1b, 0x00, 0x00, 0x00, 0x00 };
-                sbuff[9] = byte.Parse(id1);
-                sbuff[10] = byte.Parse(id2);
-                Data_Send(sbuff);
-            }
-            else
+            if((id1 == "" || id2 == "") || ((int.Parse(id1) < 1 || int.Parse(id1) > 255) || (int.Parse(id2) < 1 || int.Parse(id2) > 255)))
             {
                 MessageBox.Show("ID超出范围");
+                return;
             }
+            byte[] sbuff = new byte[13] { 0xaa, 0xaa, 0x0b, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1b, 0x00, 0x00, 0x00, 0x00 };
+            sbuff[9] = byte.Parse(id1);
+            sbuff[10] = byte.Parse(id2);
+            Data_Send(sbuff);
         }
 
         public static string ID1, ID2;
+
         private void button_IDChange_Click(object sender, EventArgs e)
         {
             if (ComDevice.IsOpen == false)
@@ -328,7 +422,122 @@ namespace 配置工具
                 sbuff[12] = byte.Parse(ID2);
                 Data_Send(sbuff);
             }
+        }
 
+        private void comboBox_RelayChannel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetRelayStatusClose();
+        }
+
+        private void button_RelaySwitch_Click(object sender, EventArgs e)
+        {
+            if (ComDevice.IsOpen == false)
+            {
+                MessageBox.Show("串口未打开");
+                return;
+            }
+            if (!IDStatusIsConnect())
+            {
+                MessageBox.Show("设备未连接");
+                return;
+            }
+            byte[] sbuff = new byte[15] { 0xaa, 0xaa, 0x0d, 0xff, 0xff, 0xff, 0xff, 0x00, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            sbuff[9] = byte.Parse(textBox_ID1.Text);
+            sbuff[10] = byte.Parse(textBox_ID2.Text);
+            sbuff[11] = byte.Parse(comboBox_RelayChannel.Text);
+            if (!RelayStatusIsOpen()) sbuff[12] = 0x64;
+            else sbuff[12] = 0x00;
+            Data_Send(sbuff);
+        }
+
+        private void comboBox_IRMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox_IRMode.SelectedIndex == 0)
+            {
+                comboBox_IRFan.SelectedIndex = 0;
+                comboBox_IRTemp.SelectedIndex = 0;
+                ClearIRStatus();
+            }
+            else
+            {
+                comboBox_IRFan.SelectedIndex = 1;
+                if (comboBox_IRTemp.SelectedIndex == 0) comboBox_IRTemp.SelectedIndex = 1;
+                ClearIRStatus();
+            }
+
+        }
+
+        private void comboBox_IRTemp_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ClearIRStatus();
+        }
+
+        private void textBox_IRNumber_TextChanged(object sender, EventArgs e)
+        {
+            ClearIRStatus();
+        }
+
+        private void button_IRSend_Click(object sender, EventArgs e)
+        {
+            if (ComDevice.IsOpen == false)
+            {
+                MessageBox.Show("串口未打开");
+                return;
+            }
+            if (!IDStatusIsConnect())
+            {
+                MessageBox.Show("设备未连接");
+                return;
+            }
+            byte[] sbuff = new byte[15] { 0xaa, 0xaa, 0x0d, 0xff, 0xff, 0xff, 0xff, 0xe0, 0x1c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            sbuff[9] = byte.Parse(textBox_ID1.Text);
+            sbuff[10] = byte.Parse(textBox_ID2.Text);
+            if (GetIRNumber() == 0x00) return;
+            sbuff[11] = GetIRNumber();
+            sbuff[12] = 0xff;
+            SetIRStatusSend();
+            Data_Send(sbuff);
+        }
+
+        private void button_IRStudy_Click(object sender, EventArgs e)
+        {
+            if (ComDevice.IsOpen == false)
+            {
+                MessageBox.Show("串口未打开");
+                return;
+            }
+            if (!IDStatusIsConnect())
+            {
+                MessageBox.Show("设备未连接");
+                return;
+            }
+            byte[] sbuff = new byte[14] { 0xaa, 0xaa, 0x0c, 0xff, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            sbuff[9] = byte.Parse(textBox_ID1.Text);
+            sbuff[10] = byte.Parse(textBox_ID2.Text);
+            if (GetIRNumber() == 0x00) return;
+            sbuff[11] = GetIRNumber();
+            SetIRStatusStudy();
+            Data_Send(sbuff);
+        }
+
+        private void button_KWhGet_Click(object sender, EventArgs e)
+        {
+            if (ComDevice.IsOpen == false)
+            {
+                MessageBox.Show("串口未打开");
+                return;
+            }
+            if (!IDStatusIsConnect())
+            {
+                MessageBox.Show("设备未连接");
+                return;
+            }
+            byte[] sbuff = new byte[15] { 0xaa, 0xaa, 0x0d, 0xff, 0xff, 0xff, 0xff, 0xff, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            sbuff[9] = byte.Parse(textBox_ID1.Text);
+            sbuff[10] = byte.Parse(textBox_ID2.Text);
+            sbuff[11] = byte.Parse(comboBox_RelayChannel.Text);
+            sbuff[12] = 0x4b;
+            Data_Send(sbuff);
         }
     }
 }

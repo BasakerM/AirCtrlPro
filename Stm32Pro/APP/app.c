@@ -162,7 +162,7 @@ void praser_485(unsigned char* buff)
 			usart1->SendByte(usart1,SendBuff,13);
 			return;
 		}
-		else if((buff[7] == 0xff) && (buff[8] == 0x19))
+		else if((buff[7] == 0xff) && (buff[8] == 0x1F))
 		{/////////////////红外学习///////////////
 			//////发至IR
 			unsigned char SendBuffToUsart2[11] = {0x7e,0x07,0x00,0xFF,0xFF,0x00,0x00,0x12,0x00,0x00,0x00};
@@ -227,7 +227,7 @@ void usart_get(void)
 	if(usart2->RecvByte(usart2,&recv_dat))
 	{
 		if(usart2_get(usart2_recv_buff,recv_dat))
-			praser_IR(usart1_recv_buff);
+			praser_IR(usart2_recv_buff);
 	}
 	if(usart3->RecvByte(usart3,&recv_dat))
 	{

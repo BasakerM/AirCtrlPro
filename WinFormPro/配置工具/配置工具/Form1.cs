@@ -28,5 +28,10 @@ namespace 配置工具
                 this.Show();
             }
         }
+
+        private void button_云笔记_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("None");
+        }
     }
 }
